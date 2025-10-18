@@ -1,48 +1,86 @@
-# CMakeLists.txt
-cmake_minimum_required(VERSION 3.20)
-project(sentinel_perception VERSION 1.0.0)
+cmake_minimum_required(VERSION 3.14)
+project(sentinel LANGUAGES CXX)
 
+# ============================================================
+# Compiler and Build Settings
+# ============================================================
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE Release)
 
-# --- Find Local & System Libraries ---
-
-# Point directly to the local LibTorch directory
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vendor/libtorch")
-
-# Point directly to the Open3D installation inside your Python venv
-# This is the key change to fix the Open3D issue
-set(Open3D_DIR "${CMAKE_CURRENT_SOURCE_DIR}/venv/lib/python3.12/site-packages/open3d/cmake")
-
-# Find the packages
-find_package(Torch REQUIRED)
-find_package(Open3D REQUIRED)
-find_package(PCL REQUIRED) # PCL is still found via Homebrew
-
-# Set C++ flags for macOS
+# For macOS M1 / Apple Silicon
 if(APPLE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION")
+    set(CMAKE_OSX_ARCHITECTURES "arm64")
 endif()
 
-# --- Configure Executable ---
+# ============================================================
+# Dependencies
+# ============================================================
 
-# Include directories
-include_directories(${TORCH_INCLUDE_DIRS})
-include_directories(${Open3D_INCLUDE_DIRS})
-include_directories(${PCL_INCLUDE_DIRS})
+# ---- PCL ----
+find_package(PCL REQUIRED COMPONENTS common io filters segmentation features)
+if(NOT PCL_FOUND)
+    message(FATAL_ERROR "PCL not found. Install via: brew install pcl")
+endif()
 
-# Add executable
-add_executable(sentinel_app
-    src/cpp/main.cpp
-    src/cpp/core/geometric_refinement.cpp
-    src/cpp/inference/model_loader.cpp
+# ---- LibTorch ----
+set(Torch_DIR "/usr/local/libtorch/share/cmake/Torch")
+find_package(Torch REQUIRED)
+if(NOT Torch_FOUND)
+    message(FATAL_ERROR "LibTorch not found. Download from pytorch.org and extract to /usr/local/libtorch")
+endif()
+
+# ---- Eigen ----
+find_package(Eigen3 REQUIRED)
+if(NOT Eigen3_FOUND)
+    message(FATAL_ERROR "Eigen3 not found. Install via: brew install eigen")
+endif()
+
+# ============================================================
+# Include Directories
+# ============================================================
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/include
+    ${PCL_INCLUDE_DIRS}
+    ${TORCH_INCLUDE_DIRS}
+    ${EIGEN3_INCLUDE_DIR}
 )
 
-# Link libraries
-target_link_libraries(sentinel_app
-    PRIVATE
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
+# ============================================================
+# Source Files
+# ============================================================
+set(SOURCES
+    src/cpp/src/main_pcl.cpp
+    src/cpp/src/geometric_refinement_pcl.cpp
+)
+
+# ============================================================
+# Executable Target
+# ============================================================
+add_executable(sentinel ${SOURCES})
+
+# ============================================================
+# Link Libraries
+# ============================================================
+target_link_libraries(sentinel
+    ${PCL_LIBRARIES}
     ${TORCH_LIBRARIES}
-    Open3D::Open3D
-    PCL::common
-    PCL::io
+    Eigen3::Eigen
 )
+
+# ============================================================
+# Post-Build Info
+# ============================================================
+message(STATUS "===================================================")
+message(STATUS " Sentinel Build Configuration")
+message(STATUS " C++ Standard: ${CMAKE_CXX_STANDARD}")
+message(STATUS " Build Type: ${CMAKE_BUILD_TYPE}")
+message(STATUS " Architecture: ${CMAKE_OSX_ARCHITECTURES}")
+message(STATUS "===================================================")
+message(STATUS " Torch Include: ${TORCH_INCLUDE_DIRS}")
+message(STATUS " PCL Include: ${PCL_INCLUDE_DIRS}")
+message(STATUS " Eigen Include: ${EIGEN3_INCLUDE_DIR}")
+message(STATUS "===================================================")

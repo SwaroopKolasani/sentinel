@@ -5,11 +5,12 @@ import os
 from google.cloud import storage
 
 class SemanticKITTIDataset(Dataset):
-    def __init__(self, root_dir, split='train', use_gcs=False, bucket_name=None):
+    def __init__(self, root_dir, split='train', use_gcs=False, bucket_name=None, use_intensity=True):
         self.root_dir = root_dir
         self.split = split
         self.use_gcs = use_gcs
         self.bucket_name = bucket_name
+        self.use_intensity = use_intensity  # Add flag for intensity
         
         # SemanticKITTI class mapping
         self.learning_map = self._get_learning_map()
@@ -123,7 +124,15 @@ class SemanticKITTIDataset(Dataset):
     def _load_local_pointcloud(self, seq, filename):
         file_path = os.path.join(self.root_dir, 'sequences', seq, 'velodyne', f'{filename}.bin')
         points = np.fromfile(file_path, dtype=np.float32).reshape(-1, 4)
-        return points[:, :3]  # Return only XYZ, ignore intensity
+        
+        # Return XYZ + intensity or just XYZ
+        if self.use_intensity:
+            return points  # Return all 4 channels (X, Y, Z, intensity)
+        else:
+            # Return XYZ with dummy intensity channel
+            xyz = points[:, :3]
+            intensity = np.ones((xyz.shape[0], 1), dtype=np.float32)
+            return np.hstack([xyz, intensity])
     
     def _load_local_labels(self, seq, filename):
         file_path = os.path.join(self.root_dir, 'sequences', seq, 'labels', f'{filename}.label')
@@ -137,7 +146,15 @@ class SemanticKITTIDataset(Dataset):
         blob = bucket.blob(f'sequences/{seq}/velodyne/{filename}.bin')
         content = blob.download_as_bytes()
         points = np.frombuffer(content, dtype=np.float32).reshape(-1, 4)
-        return points[:, :3]
+        
+        # Return XYZ + intensity or just XYZ
+        if self.use_intensity:
+            return points  # Return all 4 channels (X, Y, Z, intensity)
+        else:
+            # Return XYZ with dummy intensity channel
+            xyz = points[:, :3]
+            intensity = np.ones((xyz.shape[0], 1), dtype=np.float32)
+            return np.hstack([xyz, intensity])
     
     def _load_gcs_labels(self, seq, filename):
         client = storage.Client()

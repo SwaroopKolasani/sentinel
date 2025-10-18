@@ -9,7 +9,7 @@ class TrainingConfig:
                 'architecture': 'pointnet2',
             },
             'training': {
-                'batch_size': 8,
+                'batch_size': 2,
                 'learning_rate': 0.001,
                 'epochs': 100,
                 'optimizer': 'adam',
