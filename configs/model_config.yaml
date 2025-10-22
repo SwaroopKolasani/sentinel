@@ -1,0 +1,72 @@
+# Model Configuration for Project SENTINEL
+model:
+  architecture: pointnet2
+  num_classes: 20
+  use_intensity: true
+  
+  # PointNet++ architecture details
+  set_abstraction:
+    - layer: sa1
+      npoint: 1024
+      radius: 0.1
+      nsample: 32
+      mlp: [32, 32, 64]
+    
+    - layer: sa2
+      npoint: 256
+      radius: 0.2
+      nsample: 32
+      mlp: [64, 64, 128]
+    
+    - layer: sa3
+      npoint: 64
+      radius: 0.4
+      nsample: 32
+      mlp: [128, 128, 256]
+    
+    - layer: sa4
+      npoint: 16
+      radius: 0.8
+      nsample: 32
+      mlp: [256, 256, 512]
+  
+  feature_propagation:
+    - layer: fp4
+      mlp: [256, 256]
+    
+    - layer: fp3
+      mlp: [256, 256]
+    
+    - layer: fp2
+      mlp: [256, 128]
+    
+    - layer: fp1
+      mlp: [128, 128, 128]
+  
+  classifier:
+    hidden_dim: 128
+    dropout: 0.5
+
+# Geometric Refinement Configuration
+geometric_refinement:
+  enabled: true
+  
+  vehicle_constraints:
+    min_points: 100
+    plane_threshold: 0.1
+    min_width: 1.0
+    max_width: 3.0
+    min_length: 2.0
+    max_length: 10.0
+  
+  pedestrian_constraints:
+    min_points: 50
+    max_width: 1.0
+    min_height: 1.0
+    max_height: 2.5
+    compactness_threshold: 0.7
+  
+  ransac_parameters:
+    iterations: 1000
+    distance_threshold: 0.05
+    min_inliers: 30

@@ -1,0 +1,44 @@
+# Deployment Configuration for Project SENTINEL
+deployment:
+  # Model export settings
+  export:
+    format: torchscript
+    optimize_for_inference: true
+    batch_size: 1
+    num_points: 50000
+    quantization: false
+  
+  # C++ runtime settings
+  cpp_runtime:
+    num_threads: 4
+    use_gpu: false
+    max_batch_size: 1
+    
+  # Performance targets
+  performance:
+    max_latency_ms: 100
+    target_fps: 10
+    memory_limit_gb: 4
+  
+  # Input/Output settings
+  io:
+    input_formats:
+      - kitti_bin
+      - pcd
+      - ply
+    output_format: ply_colored
+    save_confidence: false
+  
+  # Post-processing
+  post_processing:
+    geometric_refinement: true
+    temporal_smoothing: false
+    min_cluster_size: 20
+    
+# Edge deployment (future)
+edge:
+  platform: nvidia_jetson
+  optimization:
+    tensorrt: true
+    fp16: true
+    int8: false

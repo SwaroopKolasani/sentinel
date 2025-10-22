@@ -1,0 +1,95 @@
+# Training Configuration for Project SENTINEL
+training:
+  # Basic parameters
+  batch_size: 2
+  learning_rate: 0.001
+  epochs: 100
+  optimizer: adam
+  weight_decay: 0.0001
+  gradient_clip: 1.0
+  
+  # Learning rate scheduler
+  scheduler:
+    type: step
+    step_size: 20
+    gamma: 0.7
+    min_lr: 1e-6
+  
+  # Early stopping
+  early_stopping:
+    enabled: true
+    patience: 15
+    min_delta: 0.001
+    mode: max
+    metric: val_acc
+  
+  # Checkpointing
+  checkpoint:
+    save_frequency: 5
+    save_best_only: false
+    keep_last_n: 3
+
+# Data configuration
+data:
+  num_points: 50000
+  num_workers: 4
+  pin_memory: true
+  
+  # Data splits
+  train_sequences: ['00', '01', '02', '03', '04', '05', '06', '07', '09', '10']
+  val_sequences: ['08']
+  test_sequences: ['11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21']
+  
+  # Data augmentation
+  augmentation:
+    # Basic augmentations
+    random_rotate: true
+    random_scale: true
+    scale_range: [0.9, 1.1]
+    random_jitter: true
+    jitter_std: 0.01
+    random_dropout: true
+    dropout_ratio: [0.0, 0.2]
+    
+    # Adverse weather simulation
+    adverse_weather:
+      enabled: true
+      rain_probability: 0.2
+      fog_probability: 0.2
+      snow_probability: 0.1
+      intensity_range: [0.1, 0.5]
+
+# Google Cloud Storage
+gcs:
+  bucket_name: sentinel-kitti-data
+  project_id: bug-sync-467815
+  cache_dir: /content/kitti_cache
+  use_cache: true
+
+# Paths
+paths:
+  checkpoint_dir: /content/drive/MyDrive/project-sentinel/models
+  log_dir: /content/drive/MyDrive/project-sentinel/logs
+  data_dir: /content/kitti_data
+  results_dir: /content/drive/MyDrive/project-sentinel/results
+
+# Logging
+logging:
+  tensorboard: true
+  log_frequency: 50
+  visualization_frequency: 100
+  save_predictions: true
+  
+# Evaluation
+evaluation:
+  metrics:
+    - accuracy
+    - mean_iou
+    - mean_precision
+    - mean_recall
+    - mean_fpr
+    - robustness_score
+  
+  save_confusion_matrix: true
+  save_per_class_metrics: true
+  visualization_samples: 5
