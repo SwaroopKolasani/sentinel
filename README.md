@@ -219,14 +219,10 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file.
 - Open3D and PCL communities
 - PyTorch team
 
-## 📧 Contact
 
-For questions or collaboration:
-- Email: your.email@example.com
-- Issues: [GitHub Issues](https://github.com/yourusername/project-sentinel/issues)
 
 ---
 
 **Project Status**: 🟢 Active Development
 
-**Last Updated**: October 2024
+**Last Updated**: October 2025
