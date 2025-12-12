@@ -75,7 +75,7 @@ Using three merged bands for readability:
 ## 3. Repository Layout
 
 project-sentinel/
-├── setup/                      # Environment / config helpers
+├── setup/                      # Environment and config helpers
 │   ├── 00_setup_environment.sh
 │   ├── 01_config.yaml
 │   └── 02_requirements.txt
@@ -87,7 +87,7 @@ project-sentinel/
 │   └── 06_data_augmentation.py
 │
 ├── src/
-│   ├── python/                 # Training / evaluation code (PointNet++)
+│   ├── python/                 # Training and evaluation code (PointNet++)
 │   │   ├── models/             # PointNet++ segmentation, loss functions
 │   │   ├── datasets/           # SemanticKITTI dataset loaders
 │   │   ├── utils/              # Metrics, logging, visualization
@@ -112,8 +112,9 @@ project-sentinel/
 │   └── download_semantickitti.sh
 │
 ├── models/                     # Saved checkpoints (ignored in git)
-├── docs/                       #  PDF, chapter drafts, figures
+├── docs/                       # PDF, chapter drafts, figures
 └── README.md
+
 
 
 4. Getting Started
@@ -134,12 +135,14 @@ Access to the SemanticKITTI dataset
 Create and activate a virtual environment (strongly recommended):
 
 python -m venv .venv
-source .venv/bin/activate      # On Windows: .venv\Scripts\activate
+source .venv/bin/activate        # On Windows: .venv\Scripts\activate
+
 
 
 Install Python dependencies:
 
 pip install -r setup/02_requirements.txt
+
 
 
 (Optional) Configure environment variables and paths in setup/01_config.yaml
