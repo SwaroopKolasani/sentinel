@@ -115,9 +115,9 @@ project-sentinel/
 ├── docs/                       # PDF, chapter drafts, figures
 └── README.md
 
+---
 
-
-4. Getting Started
+##4. Getting Started
 4.1 Requirements
 
 Python 3.8+
@@ -148,9 +148,9 @@ pip install -r setup/02_requirements.txt
 (Optional) Configure environment variables and paths in setup/01_config.yaml
 for dataset location, logging directories, and GPU selection.
 
+---
 
-
-5. Data Preparation (SemanticKITTI)
+##5. Data Preparation (SemanticKITTI)
 
 Download SemanticKITTI according to the official instructions and place the raw .bin
 and label files under a directory, for example:
@@ -175,8 +175,9 @@ Optionally compute the distance-binned statistics and tables used in the thesis:
 python data_preparation/05_distance_analysis.py \
     --processed_root /data/semantickitti/processed
 
+---
 
-6. Training the Baseline (PointNet++)
+##6. Training the Baseline (PointNet++)
 
 A typical training command (adapt to your actual script and config names):
 
@@ -189,9 +190,9 @@ python -m src.python.train_pointnet2 \
 The baseline is trained on SemanticKITTI sequences 00–07, 09–10, with sequence 08 used
 exclusively for validation, matching the experimental setup in the thesis.
 
+---
 
-
-7. Running SENTINEL (Hybrid Model)
+##7. Running SENTINEL (Hybrid Model)
 7.1 Python evaluation (research mode)
 
 After training the backbone, you can evaluate the hybrid system using the distance-stratified
@@ -242,9 +243,9 @@ Run the deployed pipeline on Sequence 08:
 
 This reproduces the end-to-end latency numbers reported in the thesis (≈1.05 s per frame).
 
+---
 
-
-8. Reproducing Thesis Figures and Tables
+##8. Reproducing Thesis Figures and Tables
 
 The following scripts/notebooks are intended to regenerate the main analysis artifacts:
 
@@ -260,9 +261,9 @@ C++ deployment benchmark built into sentinel_deploy (e.g., --profile flag).
 Qualitative examples of geometric refinement (failure modes)
 Visualization helpers in src/python/utils/vis.py or notebooks under notebooks/.
 
+---
 
-
-9. Limitations and Caveats
+##9. Limitations and Caveats
 
 A README is not a marketing brochure, so here are the important warts up front:
 
