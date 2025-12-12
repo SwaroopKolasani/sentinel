@@ -1,228 +1,274 @@
-# Project SENTINEL - Enhanced Perception for Autonomous Vehicles
+# SENTINEL: Semantic Enhancement Through Intelligent Noise Elimination and Labeling
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![PyTorch](https://img.shields.io/badge/pytorch-2.0+-red.svg)](https://pytorch.org/)
+[![PyTorch 2.x](https://img.shields.io/badge/pytorch-2.x-red.svg)](https://pytorch.org/)
+[![CUDA](https://img.shields.io/badge/cuda-enabled-green.svg)](https://developer.nvidia.com/cuda-toolkit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## 🚗 Overview
+SENTINEL (Semantic Enhancement Through Intelligent Noise Elimination and Labeling) is a LiDAR-only semantic segmentation system for autonomous driving. It combines a PointNet++ backbone with a post-processing geometric refinement module to reduce “ghost” detections and expose how performance degrades with distance.
 
-**SENTINEL** (Semantic Enhancement Through Intelligent Noise Elimination and Labeling) is an advanced perception system for autonomous vehicles that combines deep learning (PointNet++) with geometric validation to improve semantic segmentation reliability, particularly in adverse weather conditions.
-
-### Key Features
-- 🎯 **Hybrid Architecture**: Combines PointNet++ deep learning with RANSAC-based geometric validation
-- 🌧️ **Weather Robustness**: Specialized handling for rain, fog, snow, and dust conditions
-- ⚡ **Real-time Performance**: < 100ms inference time on standard hardware
-- 🔍 **Hallucination Reduction**: 38.7% reduction in false positive rate
-- 📊 **High Accuracy**: 54.7% mIoU on SemanticKITTI dataset
-
-## 📁 Project Structure
-```
-project-sentinel/
-├── notebooks/              # Training and evaluation notebooks
-│   ├── 01_data_setup.ipynb
-│   ├── 02_data_preprocessing.ipynb
-│   ├── 03_pointnet_training.ipynb
-│   ├── 04_model_evaluation.ipynb
-│   ├── 05_adverse_weather_simulation.ipynb
-│   └── 06_deployment_preparation.ipynb
-│
-├── src/
-│   ├── python/            # PyTorch implementation
-│   │   ├── models/        # PointNet++ architecture
-│   │   ├── datasets/      # SemanticKITTI dataset handler
-│   │   ├── utils/         # Metrics and visualization
-│   │   └── config/        # Configuration management
-│   │
-│   └── cpp/               # C++ deployment code
-│       ├── include/       # Header files
-│       └── src/           # Implementation files
-│
-├── configs/               # Configuration files
-├── scripts/               # Setup and build scripts
-├── models/                # Trained model checkpoints
-└── docs/                  # Documentation
-```
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Python 3.8+
-- CUDA 11.0+ (optional, for GPU)
-- 8GB+ RAM
-- Google Colab Pro (recommended for training)
-
-### Installation
-
-1. **Clone the repository**
-```bash
-git clone https://github.com/yourusername/project-sentinel.git
-cd project-sentinel
-```
-
-2. **Install Python dependencies**
-```bash
-pip install -r requirements.txt
-```
-
-3. **Setup Google Cloud Storage**
-```bash
-./scripts/setup_gcs.sh
-```
-
-4. **Build C++ components (optional)**
-```bash
-./scripts/build_cpp_pcl.sh
-```
-
-## 🔧 Training Pipeline
-
-### 1. Data Preparation
-```bash
-# Download KITTI dataset
-./scripts/download_kitti.sh
-
-# Or use Colab notebook
-# Run: notebooks/01_data_setup.ipynb
-```
-
-### 2. Model Training
-```python
-# In Colab, run notebooks in sequence:
-# 1. 01_data_setup.ipynb
-# 2. 02_data_preprocessing.ipynb  
-# 3. 03_pointnet_training.ipynb
-```
-
-### 3. Evaluation
-```python
-# Run evaluation notebook
-# notebooks/04_model_evaluation.ipynb
-```
-
-### 4. Adverse Weather Testing
-```python
-# Test robustness
-# notebooks/05_adverse_weather_simulation.ipynb
-```
-
-## 🎯 Performance Metrics
-
-| Metric | Baseline | SENTINEL | Improvement |
-|--------|----------|----------|-------------|
-| mIoU | 48.3% | 54.7% | +13.3% |
-| Accuracy | 87.2% | 91.3% | +4.7% |
-| FPR | 0.142 | 0.087 | -38.7% |
-| Latency | 82ms | 95ms | +13ms |
-
-### Adverse Weather Performance
-
-| Condition | Intensity | mIoU | FPR Reduction |
-|-----------|-----------|------|---------------|
-| Rain | 0.7 | 46.8% | 47.0% |
-| Fog | 0.5 | 49.3% | 46.0% |
-| Snow | 0.4 | 47.9% | 46.5% |
-
-## 💻 Usage
-
-### Python Inference
-```python
-from src.python.models.pointnet2 import PointNet2SemanticSegmentation
-import torch
-
-# Load model
-model = PointNet2SemanticSegmentation(num_classes=20)
-model.load_state_dict(torch.load('models/best_model.pth'))
-model.eval()
-
-# Inference
-points = torch.randn(1, 50000, 4)  # [B, N, XYZI]
-predictions = model(points)
-labels = predictions.argmax(dim=-1)
-```
-
-### C++ Deployment
-```bash
-# Export model to TorchScript
-python scripts/export_model_to_cpp.py \
-    --checkpoint models/best_model.pth \
-    --output models/sentinel_model.pt
-
-# Run C++ inference
-./build/sentinel models/sentinel_model.pt data/sample.bin
-```
-
-## 📊 Datasets
-
-### SemanticKITTI
-- **Training**: Sequences 00-07, 09-10 (19,130 scans)
-- **Validation**: Sequence 08 (4,071 scans)
-- **Testing**: Sequences 11-21 (20,351 scans)
-
-Download from: [SemanticKITTI](http://www.semantic-kitti.org/)
-
-## 🛠️ Configuration
-
-Edit configuration files in `configs/`:
-- `model_config.yaml` - Model architecture settings
-- `training_config.yaml` - Training hyperparameters
-- `deployment_config.yaml` - Deployment settings
-
-## 📈 Visualization
-
-The system provides various visualization tools:
-- Point cloud with semantic labels
-- Confusion matrices
-- Per-class metrics
-- Weather effect simulations
-
-## 🔬 Technical Details
-
-### PointNet++ Architecture
-- 4 Set Abstraction layers with multi-scale grouping
-- 4 Feature Propagation layers for upsampling
-- Skip connections for detail preservation
-
-### Geometric Refinement
-- RANSAC plane fitting for vehicles
-- Compactness validation for pedestrians
-- Aspect ratio constraints for objects
-
-## 📝 Citation
-
-If you use this project in your research, please cite:
-```bibtex
-@misc{sentinel2024,
-  title={SENTINEL: Enhanced Perception for Autonomous Vehicles},
-  author={Gyanan Swaroop Kolasani},
-  year={2025},
-  url={https://github.com/swaroopkolasani/project-sentinel}
-}
-```
-
-## 🤝 Contributing
-
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see [LICENSE](LICENSE) file.
-
-## 🙏 Acknowledgments
-
-- SemanticKITTI dataset creators
-- PointNet++ authors
-- Open3D and PCL communities
-- PyTorch team
-
-
+The code and experiments here correspond to the CSUDH Master’s thesis on distance-aware point cloud segmentation.
 
 ---
 
-**Project Status**: 🟢 Active Development
+## 1. Core Ideas
 
-**Last Updated**: October 2025
+- **Distance-stratified evaluation**  
+  Instead of a single scene-wide mIoU, SENTINEL evaluates performance in radial bins:
+  `0–10 m, 10–20 m, 20–30 m, 30–40 m, 40–50 m, 50–70 m, 70–100 m`.  
+  This reveals a clear “knee” in performance around 35–40 m that is invisible in aggregate metrics.
+
+- **Hybrid architecture**  
+  Stage 1: PointNet++ semantic segmentation on raw point clouds.  
+  Stage 2: RANSAC-based geometric validation that enforces simple physical constraints
+  (planarity, bounding-box size, aspect ratio, ground contact).
+
+- **Cheap geometric “gatekeeper”**  
+  In the C++ deployment, the geometric refinement adds only ~12–13 ms per frame on an NVIDIA T4,
+  while the whole pipeline is ~1.05 s per frame. The bottleneck is the backbone and data marshalling,
+  not the geometric checks.
+
+- **Realistic, slightly painful honesty**  
+  The system is not real-time yet (~1 Hz), but the method shows that geometry can significantly
+  reshape distance-performance behavior at negligible extra cost.
+
+---
+
+## 2. Key Results (SemanticKITTI, Sequence 08 Validation)
+
+All numbers below are from the final thesis version.
+
+### 2.1 Global metrics
+
+- **Baseline (PointNet++) mIoU**: 0.482  
+- **SENTINEL (PointNet++ + geometry) mIoU**: 0.547  
+- **Absolute mIoU gain**: +0.065  
+- **False Positive Rate reduction**: ~6–7 percentage points across distance bands  
+  (roughly ~40% relative reduction in “ghost” detections)
+
+### 2.2 Distance-stratified performance (illustrative)
+
+Using three merged bands for readability:
+
+| Distance Range (m) | Baseline mIoU | SENTINEL mIoU | Δ mIoU | Baseline FPR | SENTINEL FPR | Δ FPR  |
+|--------------------|--------------:|--------------:|:------:|-------------:|-------------:|:------:|
+| 0–20               | 0.651         | 0.731         | +0.080 | 0.145        | 0.082        | −0.063 |
+| 20–50              | 0.286         | 0.413         | +0.127 | 0.162        | 0.093        | −0.069 |
+| 50–100*            | 0.089         | 0.214         | +0.125 | 0.181        | 0.107        | −0.074 |
+
+\*Far-field bins (50–70 m, 70–100 m) are merged due to very few labeled objects at those ranges.
+
+### 2.3 Latency (C++ / LibTorch deployment, NVIDIA T4)
+
+| Configuration          | Mean Latency (ms) | 99th Percentile (ms) | FPS  |
+|------------------------|------------------:|----------------------:|:----:|
+| Python, CPU            | 7904.7           | 10374.9              | 0.1  |
+| PyTorch, GPU           | 2634.9           | 3458.3               | 0.4  |
+| TorchScript, GPU       | 2627.3           | 3436.3               | 0.4  |
+| C++ / LibTorch, GPU    | 1054.0           | 1383.3               | 0.9  |
+
+- Geometric refinement itself: **~12–13 ms** per frame (≈1% of total runtime).  
+- Main bottlenecks: PointNet++ forward pass + CPU↔GPU marshalling.
+
+---
+
+## 3. Repository Layout
+
+project-sentinel/
+├── setup/                      # Environment / config helpers
+│   ├── 00_setup_environment.sh
+│   ├── 01_config.yaml
+│   └── 02_requirements.txt
+│
+├── data_preparation/           # Dataset download and preprocessing
+│   ├── 03_download_from_gcs.py
+│   ├── 04_preprocess_data.py
+│   ├── 05_distance_analysis.py
+│   └── 06_data_augmentation.py
+│
+├── src/
+│   ├── python/                 # Training / evaluation code (PointNet++)
+│   │   ├── models/             # PointNet++ segmentation, loss functions
+│   │   ├── datasets/           # SemanticKITTI dataset loaders
+│   │   ├── utils/              # Metrics, logging, visualization
+│   │   └── config/             # Training configs
+│   │
+│   └── cpp/                    # C++ deployment and geometric refinement
+│       ├── include/            # C++ headers
+│       ├── src/                # C++ implementations (LibTorch + PCL)
+│       └── CMakeLists.txt
+│
+├── notebooks/                  # Colab / Jupyter experiments (optional)
+│   ├── 01_data_overview.ipynb
+│   ├── 02_density_statistics.ipynb
+│   ├── 03_pointnet_training.ipynb
+│   ├── 04_distance_stratified_eval.ipynb
+│   └── 05_visualization.ipynb
+│
+├── scripts/                    # Convenience scripts
+│   ├── run_training.sh
+│   ├── run_evaluation.sh
+│   ├── build_cpp.sh
+│   └── download_semantickitti.sh
+│
+├── models/                     # Saved checkpoints (ignored in git)
+├── docs/                       #  PDF, chapter drafts, figures
+└── README.md
+
+4. Getting Started
+4.1 Requirements
+
+Python 3.8+
+
+PyTorch 2.x with CUDA support
+
+CMake and a C++17 compiler (for deployment)
+
+PCL (Point Cloud Library) and Eigen (for geometric refinement)
+
+Access to the SemanticKITTI dataset
+4.2 Setup
+
+
+Create and activate a virtual environment (strongly recommended):
+
+python -m venv .venv
+source .venv/bin/activate      # On Windows: .venv\Scripts\activate
+
+
+Install Python dependencies:
+
+pip install -r setup/02_requirements.txt
+
+
+(Optional) Configure environment variables and paths in setup/01_config.yaml
+for dataset location, logging directories, and GPU selection.
+
+
+
+5. Data Preparation (SemanticKITTI)
+
+Download SemanticKITTI according to the official instructions and place the raw .bin
+and label files under a directory, for example:
+
+/data/semantickitti/
+    ├── dataset/
+    │   ├── sequences/00/velodyne/*.bin
+    │   ├── sequences/00/labels/*.label
+    │   └── ...
+
+
+Run the preprocessing pipeline to generate training metadata, block partitions,
+and distance statistics:
+
+python data_preparation/04_preprocess_data.py \
+    --dataset_root /data/semantickitti/dataset \
+    --output_root  /data/semantickitti/processed
+
+
+Optionally compute the distance-binned statistics and tables used in the thesis:
+
+python data_preparation/05_distance_analysis.py \
+    --processed_root /data/semantickitti/processed
+
+
+6. Training the Baseline (PointNet++)
+
+A typical training command (adapt to your actual script and config names):
+
+python -m src.python.train_pointnet2 \
+    --config src/python/config/pointnet2_semantickitti.yaml \
+    --data_root /data/semantickitti/processed \
+    --log_dir runs/pointnet2_baseline
+
+
+The baseline is trained on SemanticKITTI sequences 00–07, 09–10, with sequence 08 used
+exclusively for validation, matching the experimental setup in the thesis.
+
+
+
+7. Running SENTINEL (Hybrid Model)
+7.1 Python evaluation (research mode)
+
+After training the backbone, you can evaluate the hybrid system using the distance-stratified
+pipeline:
+
+python -m src.python.evaluate_sentinel \
+    --config src/python/config/pointnet2_semantickitti.yaml \
+    --checkpoint models/pointnet2_final.pth \
+    --data_root /data/semantickitti/processed \
+    --output_dir results/sentinel_eval
+
+
+This will:
+
+run the PointNet++ backbone on Sequence 08,
+
+apply the geometric refinement module,
+
+accumulate per-bin confusion matrices,
+
+output JSON/CSV summaries and optional plots.
+
+
+7.2 C++ deployment (LibTorch + PCL)
+
+Export the trained model to TorchScript:
+
+python -m src.python.export_to_torchscript \
+    --checkpoint models/pointnet2_final.pth \
+    --output models/pointnet2_ts.pt
+
+
+Build the C++ project:
+
+mkdir -p build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j$(nproc)
+
+
+Run the deployed pipeline on Sequence 08:
+
+./sentinel_deploy \
+    --model ../models/pointnet2_ts.pt \
+    --sequence_root /data/semantickitti/dataset/sequences/08 \
+    --output_dir ../results/deploy_seq08
+
+
+This reproduces the end-to-end latency numbers reported in the thesis (≈1.05 s per frame).
+
+
+
+8. Reproducing Thesis Figures and Tables
+
+The following scripts/notebooks are intended to regenerate the main analysis artifacts:
+
+Distance-stratified mIoU and FPR curves (Chapter 4.1)
+notebooks/04_distance_stratified_eval.ipynb or a dedicated evaluate_distance_bins.py.
+
+Car statistics by range (Table 3.1)
+data_preparation/05_distance_analysis.py.
+
+Latency comparison (Table 3.3)
+C++ deployment benchmark built into sentinel_deploy (e.g., --profile flag).
+
+Qualitative examples of geometric refinement (failure modes)
+Visualization helpers in src/python/utils/vis.py or notebooks under notebooks/.
+
+
+
+9. Limitations and Caveats
+
+A README is not a marketing brochure, so here are the important warts up front:
+
+The system is not real-time in its current form (~1 Hz on a T4).
+
+Distance-stratified far-field statistics are limited by very few labeled objects beyond ~70 m.
+
+Geometric constraints are hand-crafted and tuned for typical passenger cars; they can
+over-reject atypical vehicles and very sparse pedestrians.
+
+Adverse weather robustness is evaluated with simple synthetic perturbations, not real
+multi-weather LiDAR data.
+
