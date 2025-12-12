@@ -7,7 +7,7 @@
 
 SENTINEL (Semantic Enhancement Through Intelligent Noise Elimination and Labeling) is a LiDAR-only semantic segmentation system for autonomous driving. It combines a PointNet++ backbone with a post-processing geometric refinement module to reduce “ghost” detections and expose how performance degrades with distance.
 
-The code and experiments here correspond to the CSUDH Master’s thesis on distance-aware point cloud segmentation.
+The code and experiments here correspond to the distance-aware point cloud segmentation.
 
 ---
 
